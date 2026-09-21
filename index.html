@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Okkotsu Dev | Loja Digital</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* --- RESET & VARIAVEIS --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    :root {
+      --bg-dark: #0a0a0c;
+      --bg-card: #121218;
+      --bg-card-hover: #1a1a24;
+      --accent-purple: #7c3aed;
+      --accent-purple-hover: #6d28d9;
+      --text-white: #f3f4f6;
+      --text-muted: #9ca3af;
+      --border-color: #27272a;
+      --green-promo: #10b981;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- HEADER --- */
+    header {
+      background-color: rgba(18, 18, 24, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-white);
+    }
+    .logo span {
+      color: var(--accent-purple);
+    }
+
+    /* --- STORE STATS (AVALIAÇÃO) --- */
+    .store-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(124, 58, 237, 0.1);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+    .stars {
+      color: #f59e0b;
+    }
+
+    /* --- CONTAINER PRINCIPAL --- */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* --- BANNER TOPO --- */
+    .banner-container {
+      width: 100%;
+      height: 220px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+    .banner-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* --- GRID DE PRODUTOS --- */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* --- CARD DO PRODUTO (ESTILO GGMAX) --- */
+    .product-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-purple);
+      box-shadow: 0 10px 20px rgba(124, 58, 237, 0.15);
+    }
+
+    /* Estado Indisponível (Preto e Branco) */
+    .product-card.unavailable {
+      filter: grayscale(100%);
+      opacity: 0.7;
+    }
+    .product-card.unavailable:hover {
+      transform: none;
+      box-shadow: none;
+      border-color: var(--border-color);
+    }
+    .unavailable-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ef4444;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 4px;
+      z-index: 2;
+    }
+
+    .product-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .product-content {
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .product-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-white);
+    }
+    .product-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    /* PROMOÇÃO E PREÇOS */
+    .price-container {
+      margin-bottom: 1rem;
+    }
+    .old-price {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: line-through;
+      margin-right: 6px;
+    }
+    .current-price {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text-white);
+    }
+    .current-price.promo {
+      color: var(--green-promo);
+    }
+
+    .btn-buy {
+      background-color: var(--accent-purple);
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .btn-buy:hover {
+      background-color: var(--accent-purple-hover);
+    }
+    .product-card.unavailable .btn-buy {
+      background-color: #374151;
+      cursor: not-allowed;
+    }
+
+    /* --- CAMPO DE CUPOM FIXO (CANTO INFERIOR ESQUERDO) --- */
+    .coupon-widget {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 220px;
+    }
+    .coupon-widget input {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: white;
+      padding: 6px 8px;
+      border-radius: 4px;
+      width: 100px;
+      font-size: 0.8rem;
+      outline: none;
+    }
+    .coupon-widget input:focus {
+      border-color: var(--accent-purple);
+    }
+    .coupon-widget button {
+      background: var(--accent-purple);
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* --- MODAL PAINEL ADMIN --- */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+    .modal-admin {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      width: 90%;
+      max-width: 700px;
+      max-height: 90vh;
+      border-radius: 12px;
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .admin-header h2 {
+      color: var(--accent-purple);
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .admin-section {
+      margin-bottom: 2rem;
+    }
+    .admin-section h3 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: var(--text-muted);
+    }
+
+    .admin-item-row {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .admin-input-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .admin-input-group input, .admin-input-group textarea {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: white;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      width: 100%;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 0.85rem;
+    }
+
+    /* --- RODAPÉ --- */
+    footer {
+      background-color: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      padding: 2rem 1rem;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    footer p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+    .footer-brand {
+      font-weight: 800;
+      color: var(--accent-purple);
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">Okkotsu<span>Dev</span></div>
+    
+    <!-- AVALIAÇÕES DA LOJA -->
+    <div class="store-stats">
+      <div class="stars">
+        <i class="fas fa-star"></i> 4,8
+      </div>
+      <span style="color: var(--border-color);">|</span>
+      <span><i class="fas fa-check-circle" style="color: var(--accent-purple);"></i> +30 Vendas</span>
+    </div>
+  </header>
+
+  <!-- CONTAINER CONTEÚDO -->
+  <div class="container">
+    
+    <!-- BANNER TOPO (Pode alterar o SRC da imagem) -->
+    <div class="banner-container">
+      <img src="https://cdn.discordapp.com/attachments/1551032925825409036/1551609753405362246/file_00000000dcd8820e926606e5046f0166.png?ex=6ab298b0&is=6ab14730&hm=9ea9cfa1d962d5378211805589a4fe7df6600e4e121ceb7fed8b08143fcfb11f&" id="store-banner" alt="Banner da Loja">
+    </div>
+
+    <!-- GRID DE PRODUTOS -->
+    <div class="products-grid" id="products-grid">
+      <!-- Inserido dinamicamente via JS -->
+    </div>
+
+  </div>
+
+  <!-- CAMPO DE CUPOM FIXO -->
+  <div class="coupon-widget">
+    <i class="fas fa-ticket-alt" style="color: var(--accent-purple); font-size: 0.9rem;"></i>
+    <input type="text" id="coupon-input" placeholder="Cupom">
+    <button onclick="applyCoupon()">Usar</button>
+  </div>
+
+  <!-- MODAL ADMIN (HYDRA) -->
+  <div class="modal-overlay" id="admin-modal">
+    <div class="modal-admin">
+      <div class="admin-header">
+        <h2><i class="fas fa-user-shield"></i> Painel Administrador</h2>
+        <button class="close-btn" onclick="closeAdmin()">&times;</button>
+      </div>
+
+      <!-- Gerenciador de Cupons -->
+      <div class="admin-section">
+        <h3><i class="fas fa-tags"></i> Adicionar Cupom de Desconto</h3>
+        <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+          <input type="text" id="new-coupon-code" placeholder="Nome do Cupom (ex: PASCOA10)" style="background:var(--bg-dark); border:1px solid var(--border-color); color:white; padding:8px; border-radius:4px; flex:1;">
+          <input type="number" id="new-coupon-discount" placeholder="% Desconto" style="background:var(--bg-dark); border:1px solid var(--border-color); color:white; padding:8px; border-radius:4px; width:110px;">
+          <button onclick="addCoupon()" style="background:var(--accent-purple); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold;">Adicionar</button>
+        </div>
+        <div id="coupons-list" style="font-size:0.85rem; color:var(--text-muted);"></div>
+      </div>
+
+      <hr style="border-color: var(--border-color); margin-bottom: 1.5rem;">
+
+      <!-- Gerenciador de Produtos -->
+      <div class="admin-section">
+        <h3><i class="fas fa-boxes"></i> Gerenciar Produtos</h3>
+        <div id="admin-products-list">
+          <!-- Inserido via JS -->
+        </div>
+      </div>
+
+      <button onclick="saveAdminChanges()" style="background:var(--accent-purple); color:white; border:none; padding:12px; width:100%; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1rem;">Salvar e Aplicar Alterações</button>
+    </div>
+  </div>
+
+  <!-- RODAPÉ -->
+  <footer>
+    <p>Todos os direitos reservados</p>
+    <div class="footer-brand">Okkotsu Dev 2026</div>
+  </footer>
+
+  <script>
+    // Configurações Globais
+    const TELEFONE_WHATSAPP = "5592999999999"; // INSIRA SEU NUMERO DE WHATSAPP COM DDD AQUI
+
+    // Produtos Iniciais
+    let products = [
+      {
+        id: 1,
+        title: "Banners pro YouTube",
+        desc: "Design profissional e personalizado para o cabeçalho do seu canal.",
+        price: 50.00,
+        promoPrice: 35.00,
+        isPromo: true,
+        available: true,
+        image: "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=400&auto=format&fit=crop"
+      },
+      {
+        id: 2,
+        title: "Logos Profissionais",
+        desc: "Logotipos exclusivos em alta resolução para sua marca ou canal.",
+        price: 80.00,
+        promoPrice: 0,
+        isPromo: false,
+        available: true,
+        image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop"
+      },
+      {
+        id: 3,
+        title: "Thumbnails chamativas",
+        desc: "Miniaturas projetadas para aumentar drasticamente o CTR dos seus vídeos.",
+        price: 25.00,
+        promoPrice: 15.00,
+        isPromo: true,
+        available: true,
+        image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=400&auto=format&fit=crop"
+      },
+      {
+        id: 4,
+        title: "Flyers Divulgação",
+        desc: "Artes perfeitas para anúncios, redes sociais ou eventos.",
+        price: 40.00,
+        promoPrice: 0,
+        isPromo: false,
+        available: true,
+        image: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?q=80&w=400&auto=format&fit=crop"
+      },
+      {
+        id: 5,
+        title: "Landing Pages",
+        desc: "Páginas de vendas de alta conversão, responsivas e otimizadas.",
+        price: 250.00,
+        promoPrice: 199.00,
+        isPromo: true,
+        available: true,
+        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=400&auto=format&fit=crop"
+      }
+    ];
+
+    // Lista de Cupons Ativos (Nome: Porcentagem Desconto)
+    let activeCoupons = {
+      'PROMO10': 10
+    };
+
+    let activeDiscountPercent = 0;
+
+    // Renderizar Produtos
+    function renderProducts() {
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = '';
+
+      products.forEach(product => {
+        // Cálculo do valor final considerando promoção e cupom de desconto
+        let basePrice = product.isPromo ? product.promoPrice : product.price;
+        let finalPrice = basePrice * (1 - (activeDiscountPercent / 100));
+
+        const card = document.createElement('div');
+        card.className = `product-card ${!product.available ? 'unavailable' : ''}`;
+        
+        let priceHTML = '';
+        if (product.isPromo && product.available) {
+          priceHTML = `
+            <div class="price-container">
+              <span class="old-price">R$ ${product.price.toFixed(2)}</span>
+              <span class="current-price promo">R$ ${finalPrice.toFixed(2)}</span>
+            </div>
+          `;
+        } else {
+          priceHTML = `
+            <div class="price-container">
+              <span class="current-price">R$ ${finalPrice.toFixed(2)}</span>
+            </div>
+          `;
+        }
+
+        const msgWhatsapp = encodeURIComponent(`Olá! Gostaria de comprar o item: ${product.title} (R$ ${finalPrice.toFixed(2)})`);
+        const linkWhatsapp = `https://wa.me/${TELEFONE_WHATSAPP}?text=${msgWhatsapp}`;
+
+        card.innerHTML = `
+          ${!product.available ? '<div class="unavailable-badge">INDISPONÍVEL</div>' : ''}
+          <img src="${product.image}" alt="${product.title}" class="product-img">
+          <div class="product-content">
+            <h3 class="product-title">${product.title}</h3>
+            <p class="product-desc">${product.desc}</p>
+            ${priceHTML}
+            ${product.available 
+              ? `<a href="${linkWhatsapp}" target="_blank" class="btn-buy"><i class="fab fa-whatsapp"></i> Comprar</a>`
+              : `<button class="btn-buy" disabled>Esgotado</button>`
+            }
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    // Função para aplicar cupom
+    function applyCoupon() {
+      const input = document.getElementById('coupon-input');
+      const val = input.value.trim();
+
+      if (val === 'Hydra') {
+        openAdmin();
+        input.value = '';
+        return;
+      }
+
+      if (activeCoupons[val.toUpperCase()]) {
+        activeDiscountPercent = activeCoupons[val.toUpperCase()];
+        alert(`Cupom "${val.toUpperCase()}" aplicado! Você ganhou ${activeDiscountPercent}% de desconto.`);
+        renderProducts();
+      } else if (val !== '') {
+        alert('Cupom inválido ou expirado.');
+      }
+    }
+
+    // Modal Admin
+    function openAdmin() {
+      renderAdminProducts();
+      renderAdminCoupons();
+      document.getElementById('admin-modal').style.display = 'flex';
+    }
+
+    function closeAdmin() {
+      document.getElementById('admin-modal').style.display = 'none';
+    }
+
+    function renderAdminCoupons() {
+      const container = document.getElementById('coupons-list');
+      let html = '<strong>Cupons Existentes:</strong> ';
+      for (let code in activeCoupons) {
+        html += `<span style="background:var(--bg-dark); padding:2px 6px; border-radius:4px; margin-right:5px; border:1px solid var(--border-color);">${code} (${activeCoupons[code]}%)</span>`;
+      }
+      container.innerHTML = html;
+    }
+
+    function addCoupon() {
+      const code = document.getElementById('new-coupon-code').value.trim().toUpperCase();
+      const discount = parseFloat(document.getElementById('new-coupon-discount').value);
+
+      if (code && !isNaN(discount) && discount > 0 && discount <= 100) {
+        activeCoupons[code] = discount;
+        document.getElementById('new-coupon-code').value = '';
+        document.getElementById('new-coupon-discount').value = '';
+        renderAdminCoupons();
+        alert(`Cupom ${code} adicionado com sucesso!`);
+      } else {
+        alert('Por favor, informe um código e uma porcentagem válida (1-100).');
+      }
+    }
+
+    function renderAdminProducts() {
+      const container = document.getElementById('admin-products-list');
+      container.innerHTML = '';
+
+      products.forEach((prod, index) => {
+        const item = document.createElement('div');
+        item.className = 'admin-item-row';
+        item.innerHTML = `
+          <strong>Item #${prod.id}: ${prod.title}</strong>
+          <div class="admin-input-group">
+            <input type="text" value="${prod.title}" id="edit-title-${index}" placeholder="Nome">
+            <input type="number" step="0.01" value="${prod.price}" id="edit-price-${index}" placeholder="Preço Normal">
+            <input type="number" step="0.01" value="${prod.promoPrice}" id="edit-promoprice-${index}" placeholder="Preço Promo">
+          </div>
+          <div class="admin-input-group">
+            <input type="text" value="${prod.image}" id="edit-image-${index}" placeholder="URL da Imagem">
+          </div>
+          <div class="admin-input-group">
+            <textarea id="edit-desc-${index}" placeholder="Descrição" rows="2">${prod.desc}</textarea>
+          </div>
+          <div class="checkbox-group">
+            <label><input type="checkbox" id="edit-ispromo-${index}" ${prod.isPromo ? 'checked' : ''}> Em Promoção</label>
+            <label><input type="checkbox" id="edit-available-${index}" ${prod.available ? 'checked' : ''}> Disponível</label>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function saveAdminChanges() {
+      products.forEach((prod, index) => {
+        prod.title = document.getElementById(`edit-title-${index}`).value;
+        prod.price = parseFloat(document.getElementById(`edit-price-${index}`).value) || 0;
+        prod.promoPrice = parseFloat(document.getElementById(`edit-promoprice-${index}`).value) || 0;
+        prod.image = document.getElementById(`edit-image-${index}`).value;
+        prod.desc = document.getElementById(`edit-desc-${index}`).value;
+        prod.isPromo = document.getElementById(`edit-ispromo-${index}`).checked;
+        prod.available = document.getElementById(`edit-available-${index}`).checked;
+      });
+
+      renderProducts();
+      closeAdmin();
+      alert('Alterações salvas com sucesso!');
+    }
+
+    // Inicialização
+    renderProducts();
+  </script>
+</body>
+</html>
