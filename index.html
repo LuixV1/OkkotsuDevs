@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Okkotsu Dev | Loja Digital</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- SCRIPT DO FIREBASE (COMPAT) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
   <style>
     /* --- RESET & VARIAVEIS --- */
     * {
@@ -429,7 +434,7 @@
   <!-- CONTAINER CONTEÚDO -->
   <div class="container">
     
-    <!-- BANNER TOPO DA PRINT -->
+    <!-- BANNER TOPO -->
     <div class="banner-container">
       <img src="https://cdn.discordapp.com/attachments/1551032925825409036/1551609753405362246/file_00000000dcd8820e926606e5046f0166.png?ex=6ab298b0&is=6ab14730&hm=9ea9cfa1d962d5378211805589a4fe7df6600e4e121ceb7fed8b08143fcfb11f&" id="store-banner" alt="Banner Okkotsu Dev">
     </div>
@@ -519,7 +524,7 @@
 
       <hr style="border-color: var(--border-color); margin-bottom: 1.5rem;">
 
-      <!-- Gerenciar Produtos Existententes -->
+      <!-- Gerenciar Produtos Existentes -->
       <div class="admin-section">
         <h3><i class="fas fa-boxes"></i> Gerenciar Produtos Existentes</h3>
         <div id="admin-products-list"></div>
@@ -536,12 +541,26 @@
   </footer>
 
   <script>
+    // CONFIGURAÇÕES DO TEU FIREBASE
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdh17jP8QgPpAhH-2zuQmIoV2qPu6JPl8",
+      authDomain: "okkotsu-dev-store.firebaseapp.com",
+      databaseURL: "https://okkotsu-dev-store-default-rtdb.firebaseio.com",
+      projectId: "okkotsu-dev-store",
+      storageBucket: "okkotsu-dev-store.firebasestorage.app",
+      messagingSenderId: "819582046204",
+      appId: "1:819582046204:web:c45b3584c43018d3d6ec79",
+      measurementId: "G-R9SP7G20K4"
+    };
+
+    // Inicializa o Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const TELEFONE_WHATSAPP = "5592999999999"; // COLOQUE SEU NUMERO AQUI
 
-    let showCouponPopup = true;
-
-    // PRODUTOS EXATOS DA PRINT ORIGINAL
-    let products = [
+    // PRODUTOS PADRÃO (Alimenta a base na primeira execução)
+    const initialProducts = [
       {
         id: 1,
         title: "Banners pro YouTube",
@@ -559,13 +578,13 @@
         price: 80.00,
         promoPrice: 0,
         isPromo: false,
-        available: false, // INDISPONIVEL DA PRINT
+        available: false,
         image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop"
       },
       {
         id: 3,
         title: "Thumbnails chamativas",
-        desc: "Miniaturas projetadas para aumentar drasticamente o CTR dos seus vídeos.",
+        desc: "Miniaturas projetadas para aumentar dramaticamente o CTR dos seus vídeos.",
         price: 25.00,
         promoPrice: 15.00,
         isPromo: true,
@@ -584,11 +603,40 @@
       }
     ];
 
-    let activeCoupons = [
+    const initialCoupons = [
       { code: 'PROMO10', discount: 10, expiration: null }
     ];
 
+    let products = [];
+    let activeCoupons = [];
+    let showCouponPopup = true;
     let activeDiscountPercent = 0;
+
+    // ESCUTAR MUDANÇAS EM TEMPO REAL
+    db.ref('storeData').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        products = data.products || [];
+        activeCoupons = data.coupons || [];
+        showCouponPopup = data.showPopup !== undefined ? data.showPopup : true;
+      } else {
+        saveToFirebase(initialProducts, initialCoupons, true);
+        products = initialProducts;
+        activeCoupons = initialCoupons;
+        showCouponPopup = true;
+      }
+      
+      renderProducts();
+      checkAndShowPublicCoupons();
+    });
+
+    function saveToFirebase(newProducts = products, newCoupons = activeCoupons, newPopup = showCouponPopup) {
+      db.ref('storeData').set({
+        products: newProducts,
+        coupons: newCoupons,
+        showPopup: newPopup
+      });
+    }
 
     function renderProducts() {
       const grid = document.getElementById('products-grid');
@@ -678,6 +726,7 @@
 
     function togglePopupSetting(checked) {
       showCouponPopup = checked;
+      saveToFirebase();
     }
 
     function renderAdminCoupons() {
@@ -716,12 +765,14 @@
           expiration: expValue ? expValue : null
         });
 
+        saveToFirebase();
+
         document.getElementById('new-coupon-code').value = '';
         document.getElementById('new-coupon-discount').value = '';
         document.getElementById('new-coupon-expiration').value = '';
 
         renderAdminCoupons();
-        alert(`Cupom ${code} adicionado!`);
+        alert(`Cupom ${code} adicionado no banco em nuvem!`);
       } else {
         alert('Por favor, informe um código e uma porcentagem válida.');
       }
@@ -730,6 +781,7 @@
     function deleteCoupon(index) {
       if (confirm(`Remover o cupom "${activeCoupons[index].code}"?`)) {
         activeCoupons.splice(index, 1);
+        saveToFirebase();
         renderAdminCoupons();
       }
     }
@@ -772,7 +824,6 @@
       document.getElementById('public-coupons-modal').style.display = 'none';
     }
 
-    // ADICIONAR NOVO PRODUTO NO PAINEL ADMIN
     function addNewProduct() {
       const title = document.getElementById('add-title').value.trim();
       const price = parseFloat(document.getElementById('add-price').value) || 0;
@@ -799,6 +850,7 @@
       };
 
       products.push(newProd);
+      saveToFirebase();
 
       document.getElementById('add-title').value = '';
       document.getElementById('add-price').value = '';
@@ -809,12 +861,13 @@
       document.getElementById('add-available').checked = true;
 
       renderAdminProducts();
-      alert('Novo produto cadastrado na loja!');
+      alert('Novo produto salvo na nuvem!');
     }
 
     function deleteProduct(index) {
       if (confirm(`Excluir o produto "${products[index].title}"?`)) {
         products.splice(index, 1);
+        saveToFirebase();
         renderAdminProducts();
       }
     }
@@ -862,17 +915,10 @@
         prod.available = document.getElementById(`edit-available-${index}`).checked;
       });
 
-      renderProducts();
+      saveToFirebase();
       closeAdmin();
-      alert('Alterações salvas com sucesso!');
+      alert('Alterações salvas na nuvem com sucesso!');
     }
-
-    // Inicialização
-    renderProducts();
-
-    setTimeout(() => {
-      checkAndShowPublicCoupons();
-    }, 1000);
   </script>
 </body>
 </html>
